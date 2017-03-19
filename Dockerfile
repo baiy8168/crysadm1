@@ -1,8 +1,8 @@
 # 这是迅雷云监工的docker程序
-# 云监工原作者powergx,所有贡献者,所有被我抄袭的大神以及CCTV
+# 云监工原作者powergx
 
 FROM tutum/ubuntu:trusty
-
+MAINTAINER hauntek <hauntek@hotmail.com>
 
 RUN rm /bin/sh &&  ln -s /bin/bash /bin/sh
 
@@ -13,13 +13,13 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN apt-get update && apt-get install -y sudo git wget vim nginx
 
 #创建工作目录
-RUN mkdir /app 
+RUN mkdir /app
 WORKDIR /app
 
 #下载云监工源代码
-RUN git clone https://github.com/ccav14/723.git
+RUN git clone https://github.com/hauntek/crysadm.git
 
-#redis数据库保存目录
+#Redis数据库保存目录
 VOLUME ["/var/lib/redis"]
 
 #安装python，redis
@@ -31,10 +31,12 @@ RUN pip3.4 install redis && pip3.4 install requests && pip3.4 install flask
 #复制配置文件
 RUN mv /etc/nginx/sites-available/default ./
 COPY default /etc/nginx/sites-available/
-RUN apt-get clean 
+COPY config.py ./crysadm/
+COPY run.sh ./
+RUN apt-get clean
 
 #脚本加运行权限
-RUN chmod +x ./723/run.sh 
+RUN chmod +x ./run.sh
 
 #设置容器端口
 #云监工端口
@@ -46,7 +48,7 @@ EXPOSE 80
 
 RUN chmod +w /set_root_pw.sh
 #添加运行脚本
-RUN echo "/app/723/run.sh" >>/set_root_pw.sh
+RUN echo "/app/run.sh" >>/set_root_pw.sh
 RUN echo "service nginx start" >>/set_root_pw.sh
 RUN echo "service nginx reload" >>/set_root_pw.sh
 RUN echo "/bin/bash" >>/set_root_pw.sh
